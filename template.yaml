@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  CustomMessage:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: broadcast/
+      Handler: app.broadcast
+      Runtime: nodejs12.x
+      Events:
+        Standup:
+          Type: Schedule
+          Properties:
+            Schedule: cron(45 17 ? * TUE,THU *)
+            Input:
+              Fn::Sub:
+                - '{"WebhookUrl": "${WebhookUrl}", "Message": "${Message}"}'
+                - WebhookUrl: '{{resolve:ssm:webhook_url:2}}'
+                  Message: "/md @Present **It's time for standup!** :bell:\\n\\n1. What did you do yesterday?\\n1. What are you working on today?\\n1. Are you blocked or do you need help with anything?"
