@@ -42,7 +42,7 @@ exports.status_page = async function(event, context) {
 
   try {
     await axios.post(webhookUrl, {
-      Content: `/md \\[**${pageName}**\\] [${incidentName}](${url}) (${status})\n\n ${update.body}`,
+      Content: `/md **${pageName}** [${incidentName}](${url}) (${status})\n\n ${update.body}`,
     });
   } catch (error) {
     console.log(`statuspage error=${error}`);
