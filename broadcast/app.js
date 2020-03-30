@@ -33,6 +33,11 @@ exports.status_page = async function(event, context) {
   const url = request.incident.shortlink;
   const status = request.incident.status;
   const updates = request.incident.incident_updates;
+
+  if (updates.length != 1) {
+    return { 'statusCode': 200 };
+  }
+
   const update = updates.sort((a, b) => b.updated_at - a.updated_at)[0];
 
   try {
