@@ -3,14 +3,17 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 30
+    Environment:
+      Variables:
+        WEBHOOK_URL: '{{resolve:ssm:webhook_url:2}}'
 
 Resources:
   CustomMessage:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: broadcast/
-      Handler: app.broadcast
+      Handler: app.custom_message
       Runtime: nodejs12.x
       Events:
         Standup:
@@ -19,6 +22,18 @@ Resources:
             Schedule: cron(45 17 ? * TUE,THU *)
             Input:
               Fn::Sub:
-                - '{"WebhookUrl": "${WebhookUrl}", "Message": "${Message}"}'
-                - WebhookUrl: '{{resolve:ssm:webhook_url:2}}'
-                  Message: "/md @Present **It's time for standup!** :bell:\\n\\n1. What did you do yesterday?\\n1. What are you working on today?\\n1. Are you blocked or do you need help with anything?"
+                - '{"Message": "${Message}"}'
+                - Message: "/md @Present **It's time for standup!** :bell:\\n\\n1. What did you do yesterday?\\n1. What are you working on today?\\n1. Are you blocked or do you need help with anything?"
+
+  StatusPage:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: broadcast/
+      Handler: app.status_page
+      Runtime: nodejs12.x
+      Events:
+        StatusPage:
+          Type: Api
+          Properties:
+            Path: '/statuspage'
+            Method: post
