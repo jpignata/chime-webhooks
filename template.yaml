@@ -6,25 +6,9 @@ Globals:
     Timeout: 30
     Environment:
       Variables:
-        WEBHOOK_URL: '{{resolve:ssm:webhook_url:2}}'
+        WEBHOOK_URL: '{{resolve:ssm:webhook_url:3}}'
 
 Resources:
-  CustomMessage:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: broadcast/
-      Handler: app.custom_message
-      Runtime: nodejs12.x
-      Events:
-        Standup:
-          Type: Schedule
-          Properties:
-            Schedule: cron(45 17 ? * TUE,THU *)
-            Input:
-              Fn::Sub:
-                - '{"Message": "${Message}"}'
-                - Message: "/md @Present **It's time for standup!** :bell:\\n\\n1. What did you do yesterday?\\n1. What are you working on today?\\n1. Are you blocked or do you need help with anything?"
-
   StatusPage:
     Type: AWS::Serverless::Function
     Properties:
