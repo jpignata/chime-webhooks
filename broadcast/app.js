@@ -13,6 +13,7 @@ exports.custom_message = async function(event, context) {
 
 exports.status_page = async function(event, context) {
   const request = JSON.parse(event.body);
+  console.log(request);
 
   if (!('incident' in request)) {
     return { 'statusCode': 200 };
@@ -46,7 +47,6 @@ exports.status_page = async function(event, context) {
     });
   } catch (error) {
     console.log(`statuspage error=${error}`);
-    console.log(request)
     return { 'statusCode': 500 };
   }
 
