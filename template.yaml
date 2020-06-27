@@ -21,3 +21,16 @@ Resources:
           Properties:
             Path: '/statuspage'
             Method: post
+
+  GitHub:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: broadcast/
+      Handler: app.github
+      Runtime: nodejs12.x
+      Events:
+        StatusPage:
+          Type: Api
+          Properties:
+            Path: '/github'
+            Method: post
