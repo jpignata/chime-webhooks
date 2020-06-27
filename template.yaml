@@ -9,19 +9,6 @@ Globals:
         WEBHOOK_URL: '{{resolve:ssm:webhook_url:3}}'
 
 Resources:
-  StatusPage:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: broadcast/
-      Handler: app.status_page
-      Runtime: nodejs12.x
-      Events:
-        StatusPage:
-          Type: Api
-          Properties:
-            Path: '/statuspage'
-            Method: post
-
   GitHub:
     Type: AWS::Serverless::Function
     Properties:
