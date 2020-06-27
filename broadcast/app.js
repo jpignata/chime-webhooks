@@ -3,56 +3,29 @@ const webhookUrl = process.env.WEBHOOK_URL;
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-exports.github = async function(event, context) {
-  const request = JSON.parse(event.body);
-  console.log(request);
+exports.github = async function(event) {
+  const { action, pull_request, repository, review } = JSON.parse(event.body);
+  const pullRequestTitle = pull_request.title;
+  const pullRequestBody = pull_request.body;
+  const pullRequestActor = pull_request.user.login;
+  const pullRequestUrl = pull_request.html_url;
+  const pullRequestMerged = pull_request.merged;
+  const repositoryName = repository.name;
 
-  if ('review' in request) {
-    const { review, repository, action, pull_request } = request
-    const { html_url, state, user, body } = review;
-    const title = pull_request.title;
-    const login = user.login;
-    const repo = repository.name;
+  if (action === 'submitted') {
+    const reviewBody = review.body;
+    const reviewer = review.user.login;
+    const reviewUrl = review.html_url;
+    const verb = review.state === 'approved' ? 'approved' : 'reviewed';
 
-    if (action === 'submitted') {
-      await announceNewPullRequestReview(login, title, body, state, repo, html_url);
-    }
-  } else if ('pull_request' in request) {
-    const { pull_request, repository } = request
-    const { title, html_url, user, body } = pull_request;
-    const login = user.login;
-    const repo = repository.name;
-
-    if (request.action === 'opened') {
-      await announceNewPullRequest(login, title, repo, body, html_url);
-    } else if (request.action === 'closed' && request.merged === true) {
-      await announceMergedPullRequest(login, title, repo, html_url);
-    }
-  } 
-
-  return { 'statusCode': 200 };
-}
-
-async function announceNewPullRequest(login, title, repo, body, html_url) {
-  await say(`/md [[*${repo}*]] ${login} opened [${title}](${html_url})\n\n---\n\n${body}`);
-}
-
-async function announceMergedPullRequest(login, title, repo, html_url) {
-  await say(`/md [[*${repo}*]] ${login} merged [${title}](${html_url})`);
-}
-
-async function announceNewPullRequestReview(login, title, body, state, repo, html_url) {
-  let action;
-
-  if (state === 'approved') {
-    action = 'approved';
-  } else if (state === 'REQUEST_CHANGES') {
-    action = 'requested changes in';
-  } else {
-    action = 'commented on';
+    await say(`/md *${repositoryName}* — ${reviewer} **${verb}** [${pullRequestTitle}](${reviewUrl})\n\n---\n\n${reviewBody}`);    
+  } else if (action === 'opened') {
+    await say(`/md *${repositoryName}* — ${pullRequestActor} **opened** [${pullRequestTitle}](${pullRequestUrl})\n\n---\n\n${pullRequestBody}`);
+  } else if (action === 'closed' && pullRequestMerged === true) {
+    await say(`/md *${repositoryName}* — ${pullRequestActor} **merged** [${pullRequestTitle}](${pullRequestUrl})`);
   }
 
-  await say(`/md [[*${repo}*]] ${login} ${action} [${title}](${html_url})\n\n---\n\n${body}`);
+  return { 'statusCode': 200 };
 }
 
 async function say(message) {
