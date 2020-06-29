@@ -13,12 +13,11 @@ exports.github = async function(event) {
   const repositoryName = repository.name;
 
   if (action === 'submitted') {
-    const reviewBody = review.body;
     const reviewer = review.user.login;
     const reviewUrl = review.html_url;
     const verb = review.state === 'approved' ? 'approved' : 'reviewed';
 
-    await say(`/md *${repositoryName}* — ${reviewer} **${verb}** [${pullRequestTitle}](${reviewUrl})\n\n---\n\n${reviewBody}`);    
+    await say(`/md *${repositoryName}* — ${reviewer} **${verb}** [${pullRequestTitle}](${reviewUrl})`);
   } else if (action === 'opened') {
     await say(`/md *${repositoryName}* — ${pullRequestActor} **opened** [${pullRequestTitle}](${pullRequestUrl})\n\n---\n\n${pullRequestBody}`);
   } else if (action === 'closed' && pullRequestMerged === true) {
